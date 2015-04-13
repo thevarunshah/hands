@@ -12,7 +12,7 @@ public class HandsGameplay {
 
 	public static void main(String[] args) {
 
-		System.out.println("Welcome to Hands!");
+		System.out.println("Welcome to Hands!\n");
 		deckCards = HandsBackend.getDeck().getCards();
 
 		HandsBackend.createPlayers();
@@ -20,7 +20,8 @@ public class HandsGameplay {
 		int roundNum = 1;
 		//start game
 		while(true){
-
+			
+			System.out.println();
 			System.out.println("Round " + roundNum);
 			HandsBackend.getDeck().shuffleDeck();
 
@@ -39,14 +40,17 @@ public class HandsGameplay {
 
 			//get hand estimations
 			HandsBackend.setHandEstimations(roundNum, dealerIndex, startIndex);
-
+			
+			int turnStart = startIndex;
+			int turnEnd = dealerIndex;
+			
 			//play this round
 			for(int i = 0; i < 11-roundNum; i++){
 				
 				ArrayList<Card> pile = new ArrayList<Card>();
 				Suit pileSuit = null;
 				//everyone plays turn
-				for(int j = startIndex; j != dealerIndex; j++){
+				for(int j = turnStart; j != turnEnd; j++){
 
 					Player p = HandsBackend.getPlayers().get(j);
 					System.out.println("Player: " + p.getName());
@@ -56,23 +60,31 @@ public class HandsGameplay {
 					for(int k = 0; k < playerHand.size(); k++){
 						System.out.print(k+1 + ") " + playerHand.get(k) + "  ");
 					}
-					System.out.println("\n");
+					System.out.println();
 
 					System.out.println("Which card would you like to play? (enter number)");
-					if(j == startIndex){
+					if(j == turnStart){
 						int cardIndex = IO.readInt();
 						while(cardIndex > p.getHand().size()){
 							System.out.println("Please reenter a valid value");
 							cardIndex = IO.readInt();
 						}
+						System.out.println();
 						pileSuit = p.getHand().get(cardIndex-1).getSuit();
 						pile.add(p.getHand().get(cardIndex-1));
 						p.getHand().remove(cardIndex-1);
 					}
 					else{
 						System.out.println("Current pile:");
+						boolean first = true;
 						for(Card c : pile){
-							System.out.print(c + ";\t");
+							if(first){
+								System.out.print(c);
+								first = false;
+							}
+							else{
+								System.out.print(" | " + c);
+							}
 						}
 						System.out.println();
 						int cardIndex = IO.readInt();
@@ -96,6 +108,7 @@ public class HandsGameplay {
 								cardIndex = IO.readInt();
 							}
 						}
+						System.out.println();
 						pile.add(p.getHand().get(cardIndex-1));
 						p.getHand().remove(cardIndex-1);
 					}
@@ -104,46 +117,54 @@ public class HandsGameplay {
 						j = -1;
 					}
 				}
-				//dealer plays turn
-				Player dealer = HandsBackend.getPlayers().get(dealerIndex);
-				System.out.println("Player: " + dealer.getName());
-				ArrayList<Card> playerHand = dealer.getHand();
+				//last player
+				Player last = HandsBackend.getPlayers().get(turnEnd);
+				System.out.println("Player: " + last.getName());
+				ArrayList<Card> playerHand = last.getHand();
 
 				System.out.println("Your hand: ");
 				for(int j = 0; j < playerHand.size(); j++){
 					System.out.print(j+1 + ") " + playerHand.get(j) + "  ");
 				}
-				System.out.println("\n");
+				System.out.println();
 
 				System.out.println("Which card would you like to play? (enter number)");
 				System.out.println("Current pile:");
+				boolean first = true;
 				for(Card c : pile){
-					System.out.print(c + ";\t");
+					if(first){
+						System.out.print(c);
+						first = false;
+					}
+					else{
+						System.out.print(" | " + c);
+					}
 				}
 				System.out.println();
 				int cardIndex = IO.readInt();
-				while(cardIndex > dealer.getHand().size()){
+				while(cardIndex > last.getHand().size()){
 					System.out.println("Please reenter a valid value");
 					cardIndex = IO.readInt();
 				}
 				//legal card play check
 				boolean hasPileSuit = false;
-				for(Card c : dealer.getHand()){
+				for(Card c : last.getHand()){
 					if(c.getSuit() == pileSuit){
 						hasPileSuit = true;
 						break;
 					}
 				}
-				while(dealer.getHand().get(cardIndex-1).getSuit() != pileSuit && hasPileSuit){
+				while(last.getHand().get(cardIndex-1).getSuit() != pileSuit && hasPileSuit){
 					System.out.println("You must play the suit that is the current pile's suit.");
 					cardIndex = IO.readInt();
-					while(cardIndex > dealer.getHand().size()){
+					while(cardIndex > last.getHand().size()){
 						System.out.println("Please reenter a valid value");
 						cardIndex = IO.readInt();
 					}
 				}
-				pile.add(dealer.getHand().get(cardIndex-1));
-				dealer.getHand().remove(cardIndex-1);
+				System.out.println();
+				pile.add(last.getHand().get(cardIndex-1));
+				last.getHand().remove(cardIndex-1);
 
 				//calculate turn winner
 				Card currentHighest = pile.get(0);
@@ -167,7 +188,7 @@ public class HandsGameplay {
 					}
 				}
 				int turnWinnerIndex = pile.indexOf(currentHighest);
-				int playerIndex = startIndex;
+				int playerIndex = turnStart;
 				for(int count = 0; count < turnWinnerIndex; count++){
 					if(playerIndex+1 == HandsBackend.getPlayers().size()){
 						playerIndex = 0;
@@ -175,8 +196,17 @@ public class HandsGameplay {
 					}
 					playerIndex++;
 				}
-				System.out.println(HandsBackend.getPlayers().get(playerIndex).getName() + ", you won this turn!");
+				
+				System.out.println(HandsBackend.getPlayers().get(playerIndex).getName() + ", that's your hand!");
+				System.out.println();
 				HandsBackend.getPlayers().get(playerIndex).setCurrentNumHands(HandsBackend.getPlayers().get(playerIndex).getCurrentNumHands()+1);
+				
+				//modify who starts next turn
+				turnStart = playerIndex;
+				turnEnd = playerIndex-1;
+				if(playerIndex-1 < 0){
+					turnEnd = HandsBackend.getPlayers().size()-1;
+				}
 			}
 
 			for(Player p : HandsBackend.getPlayers()){
@@ -193,21 +223,19 @@ public class HandsGameplay {
 			for(Player p : HandsBackend.getPlayers()){
 				System.out.println(p.getName() + ": " + p.getPoints() + " points");
 			}
+			
+			roundNum++;
 
 			//win condition
-			boolean exit = false;
+			boolean someoneWon = false;
 			for(Player p : HandsBackend.getPlayers()){
 				if(p.getPoints() >= 75){
 					System.out.println(p.getName() + ", you won!!");
-					exit = true;
+					someoneWon = true;
 				}
 			}
-			if(exit){
-				break;
-			}
-
-			roundNum++;
-			if(roundNum == 11){
+			
+			if(someoneWon || roundNum == 11){
 				break;
 			}
 		}
