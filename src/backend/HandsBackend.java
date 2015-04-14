@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import classes.Card;
 import classes.Deck;
 import classes.Player;
+import classes.Suit;
 
 public class HandsBackend {
 	
@@ -95,18 +96,26 @@ public class HandsBackend {
 		return startIndex;
 	}
 	
-	private static void printPlayerHand(Player p){
+	private static void printPlayerHand(Player p, boolean num){
 		
 		ArrayList<Card> pHand = p.getHand();
 		
 		System.out.println("Your hand: ");
-		for(int j = 0; j < pHand.size(); j++){
-			if(j+1 != pHand.size()){
-				System.out.print(pHand.get(j) + " | ");
+		if(!num){
+			for(int i = 0; i < pHand.size(); i++){
+				if(i+1 != pHand.size()){
+					System.out.print(pHand.get(i) + " | ");
+				}
+				else{
+					System.out.println(pHand.get(i));
+				}
 			}
-			else{
-				System.out.println(pHand.get(j));
+		}
+		else{
+			for(int i = 0; i < pHand.size(); i++){
+				System.out.print(i+1 + ") " + pHand.get(i) + "  ");
 			}
+			System.out.println();
 		}
 	}
 	
@@ -117,7 +126,7 @@ public class HandsBackend {
 			
 			Player p = players.get(i);
 			System.out.println("Player: " + p.getName());
-			printPlayerHand(p);
+			printPlayerHand(p, false);
 			
 			System.out.println("How many hands do you think you will be able to make?");
 			p.setHandsEstimation(IO.readInt());
@@ -129,9 +138,9 @@ public class HandsBackend {
 		}
 		
 		//dealer declares hands
-		Player dealer = HandsBackend.getPlayers().get(dealerIndex);
+		Player dealer = players.get(dealerIndex);
 		System.out.println("Player: " + dealer.getName());
-		printPlayerHand(dealer);
+		printPlayerHand(dealer, false);
 		
 		//num hands already declared
 		int totalHands = 0;
@@ -148,6 +157,153 @@ public class HandsBackend {
 		}
 		dealer.setHandsEstimation(dealerHands);
 		System.out.println();
+	}
+	
+	private static void printPile(ArrayList<Card> pile){
+		
+		boolean first = true;
+		for(Card c : pile){
+			if(first){
+				System.out.print(c);
+				first = false;
+			}
+			else{
+				System.out.print(" | " + c);
+			}
+		}
+		System.out.println();
+	}
+	
+	private static void doLegalPlay(Suit pileSuit, Player p, int cardIndex){
+		
+		boolean hasPileSuit = false;
+		for(Card c : p.getHand()){
+			if(c.getSuit() == pileSuit){
+				hasPileSuit = true;
+				break;
+			}
+		}
+		
+		while(p.getHand().get(cardIndex-1).getSuit() != pileSuit && hasPileSuit){
+			System.out.println("You must play the suit that is the current pile's suit.");
+			cardIndex = IO.readInt();
+			while(cardIndex > p.getHand().size()){
+				System.out.println("Please reenter a valid value");
+				cardIndex = IO.readInt();
+			}
+		}
+		System.out.println();
+	}
+	
+	private static int findWinner(ArrayList<Card> pile, Suit trumpSuit, int turnStart){
+		
+		Card currentHighest = pile.get(0);
+		for(Card c : pile){
+			if(c.getSuit() == trumpSuit){
+				if(currentHighest.getSuit() == trumpSuit){
+					if(currentHighest.getValue().isLessThan(c.getValue())){
+						currentHighest = c;
+					}
+				}
+				else{
+					currentHighest = c;
+				}
+			}
+			else{
+				if(c.getSuit() == currentHighest.getSuit()){
+					if(currentHighest.getValue().isLessThan(c.getValue())){
+						currentHighest = c;
+					}
+				}
+			}
+		}
+		int turnWinnerIndex = pile.indexOf(currentHighest);
+		int playerIndex = turnStart;
+		for(int count = 0; count < turnWinnerIndex; count++){
+			if(playerIndex+1 == players.size()){
+				playerIndex = 0;
+				continue;
+			}
+			playerIndex++;
+		}
+		
+		return playerIndex;
+	}
+	
+	public static int playTurn(int turnStart, int turnEnd, Suit trumpSuit){
+		
+		ArrayList<Card> pile = new ArrayList<Card>();
+		Suit pileSuit = null;
+		//everyone plays turn
+		for(int i = turnStart; i != turnEnd; i++){
+
+			Player p = players.get(i);
+			System.out.println("Player: " + p.getName());
+			printPlayerHand(p, true);
+
+			System.out.println("Which card would you like to play? (enter number)");
+			if(i == turnStart){
+				int cardIndex = IO.readInt();
+				while(cardIndex > p.getHand().size()){
+					System.out.println("Please reenter a valid value");
+					cardIndex = IO.readInt();
+				}
+				System.out.println();
+				
+				pileSuit = p.getHand().get(cardIndex-1).getSuit();
+				pile.add(p.getHand().get(cardIndex-1));
+				p.getHand().remove(cardIndex-1);
+			}
+			else{
+				System.out.println("Current pile:");
+				printPile(pile);
+				
+				int cardIndex = IO.readInt();
+				while(cardIndex > p.getHand().size()){
+					System.out.println("Please reenter a valid value");
+					cardIndex = IO.readInt();
+				}
+				
+				//legal card play check
+				doLegalPlay(pileSuit, p, cardIndex);
+				
+				pile.add(p.getHand().get(cardIndex-1));
+				p.getHand().remove(cardIndex-1);
+			}
+
+			if(i+1 == players.size()){
+				i = -1;
+			}
+		}
+		//last player
+		Player last = players.get(turnEnd);
+		System.out.println("Player: " + last.getName());
+		printPlayerHand(last, true);
+
+		System.out.println("Which card would you like to play? (enter number)");
+		System.out.println("Current pile:");
+		printPile(pile);
+
+		int cardIndex = IO.readInt();
+		while(cardIndex > last.getHand().size()){
+			System.out.println("Please reenter a valid value");
+			cardIndex = IO.readInt();
+		}
+		
+		//legal card play check
+		doLegalPlay(pileSuit, last, cardIndex);
+
+		pile.add(last.getHand().get(cardIndex-1));
+		last.getHand().remove(cardIndex-1);
+
+		//calculate turn winner
+		int playerIndex = findWinner(pile, trumpSuit, turnStart);
+		
+		System.out.println(players.get(playerIndex).getName() + ", that's your hand!");
+		System.out.println();
+		players.get(playerIndex).setCurrentNumHands(players.get(playerIndex).getCurrentNumHands()+1);
+		
+		return playerIndex;
 	}
 	
 	public static ArrayList<Player> getPlayers() {
