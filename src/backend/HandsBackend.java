@@ -159,6 +159,17 @@ public class HandsBackend {
 		System.out.println();
 	}
 	
+	private static int getCardIndex(Player p){
+		
+		int cardIndex = IO.readInt();
+		while(cardIndex > p.getHand().size()){
+			System.out.println("Please reenter a valid value");
+			cardIndex = IO.readInt();
+		}
+		
+		return cardIndex;
+	}
+	
 	private static void printPile(ArrayList<Card> pile){
 		
 		boolean first = true;
@@ -243,11 +254,7 @@ public class HandsBackend {
 
 			System.out.println("Which card would you like to play? (enter number)");
 			if(i == turnStart){
-				int cardIndex = IO.readInt();
-				while(cardIndex > p.getHand().size()){
-					System.out.println("Please reenter a valid value");
-					cardIndex = IO.readInt();
-				}
+				int cardIndex = getCardIndex(p);
 				System.out.println();
 				
 				pileSuit = p.getHand().get(cardIndex-1).getSuit();
@@ -258,11 +265,7 @@ public class HandsBackend {
 				System.out.println("Current pile:");
 				printPile(pile);
 				
-				int cardIndex = IO.readInt();
-				while(cardIndex > p.getHand().size()){
-					System.out.println("Please reenter a valid value");
-					cardIndex = IO.readInt();
-				}
+				int cardIndex = getCardIndex(p);
 				
 				//legal card play check
 				doLegalPlay(pileSuit, p, cardIndex);
@@ -284,11 +287,7 @@ public class HandsBackend {
 		System.out.println("Current pile:");
 		printPile(pile);
 
-		int cardIndex = IO.readInt();
-		while(cardIndex > last.getHand().size()){
-			System.out.println("Please reenter a valid value");
-			cardIndex = IO.readInt();
-		}
+		int cardIndex = getCardIndex(last);
 		
 		//legal card play check
 		doLegalPlay(pileSuit, last, cardIndex);
@@ -304,6 +303,28 @@ public class HandsBackend {
 		players.get(playerIndex).setCurrentNumHands(players.get(playerIndex).getCurrentNumHands()+1);
 		
 		return playerIndex;
+	}
+	
+	public static void calculateRoundWinners(){
+		
+		for(Player p : players){
+			if(p.getCurrentNumHands() == p.getHandsEstimation()){
+				p.setPoints(p.getPoints()+10+p.getCurrentNumHands());
+			}
+		}
+	}
+	
+	public static boolean winCondition(){
+		
+		boolean someoneWon = false;
+		for(Player p : players){
+			if(p.getPoints() >= 75){
+				System.out.println(p.getName() + ", you won!!");
+				someoneWon = true;
+			}
+		}
+		
+		return someoneWon;
 	}
 	
 	public static ArrayList<Player> getPlayers() {

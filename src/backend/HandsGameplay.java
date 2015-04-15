@@ -55,37 +55,32 @@ public class HandsGameplay {
 					turnEnd = HandsBackend.getPlayers().size()-1;
 				}
 			}
-
+			
+			System.out.println("Number of hands this round:");
 			for(Player p : HandsBackend.getPlayers()){
 				System.out.println(p.getName() + ": " + p.getCurrentNumHands() + " hands");
 			}
 
-			//calculate round winners
-			for(Player p : HandsBackend.getPlayers()){
-				if(p.getCurrentNumHands() == p.getHandsEstimation()){
-					p.setPoints(p.getPoints()+10+p.getCurrentNumHands());
-				}
-			}
-
+			HandsBackend.calculateRoundWinners();
+			System.out.println();
+			
+			System.out.println("Points per player:");
 			for(Player p : HandsBackend.getPlayers()){
 				System.out.println(p.getName() + ": " + p.getPoints() + " points");
 			}
+			System.out.println("----------");
 			
 			roundNum++;
 
 			//win condition
-			boolean someoneWon = false;
-			for(Player p : HandsBackend.getPlayers()){
-				if(p.getPoints() >= 75){
-					System.out.println(p.getName() + ", you won!!");
-					someoneWon = true;
-				}
-			}
+			boolean someoneWon = HandsBackend.winCondition();
 			
 			if(someoneWon || roundNum == 11){
 				break;
 			}
 		}
+		
+		System.out.println("----------");
+		System.out.println("Thank you for playing!");
 	}
-
 }
