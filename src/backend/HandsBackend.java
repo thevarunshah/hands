@@ -12,6 +12,12 @@ public class HandsBackend {
 	private static ArrayList<Player> players = new ArrayList<Player>(5);
 	private static Deck deck = new Deck();
 	
+	public static void printRules(){
+		
+		System.out.println("Welcome to Hands!\n");
+		System.out.println("To look at how to play, please look at the attached Hands.txt file.\n");
+	}
+	
 	public static void createPlayers(){
 		
 		System.out.println("How many players will there be? (2-5)");

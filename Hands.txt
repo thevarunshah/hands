@@ -1,0 +1,19 @@
+Hands
+
+Objective: to be the first person to reach 75 points; to have fun.
+
+How it works:
+-Each player starts out with 10 cards. There can be a maximum of 5 players.
+-Every round starts with 1 less card for a maximum of 10 rounds.
+  -1st round: 10 cards
+  -2nd round: 9 cards
+  -3rd round: 8 cards
+  -and so on...
+-Each round is played until there are no cards left in each player's hand.
+-The first round, a dealer is chosen and deals the cards. For every round after, the dealer is rotated clockwise.
+-After the cards are dealt, the dealer takes off the first card from the left over cards and that card's suit is the trump suit for this round.
+  -The trump suit is chosen in the same way for every round.
+-Each player, every round, starting with the player clockwise after the dealer, strategically declares how many "hands" they will be able to make that round. A hand is made when you have either played a card of the highest value of the current suit in the pile OR if you have played the highest trump suit when you don't have the current suit.
+  -When declaring the number of hands, the total number of hands cannot equal the round number. For example, if it is round 7, and everyone's total number of hands is 6 before the dealer (who declares his number of hands last), the dealer must either say they are making 0, 2, or more hands.
+-At the end of each round, if and only if a player has made EXACTLY the amount of cards they declared, they add 10 to their number of hands for that round and that is how many points they get for that round. For example, if a player said they would make 5 hands, they get 15 points. If a player ends up making less or more than the number of hands they declared, they get 0 points.
+-The game ends when a player reaches 75 points (they are the winner) or when all 10 rounds are over (player with the highest points wins).

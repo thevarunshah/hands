@@ -10,7 +10,8 @@ public class HandsGameplay {
 
 	public static void main(String[] args) {
 
-		System.out.println("Welcome to Hands!\n");
+		HandsBackend.printRules();
+		
 		deckCards = HandsBackend.getDeck().getCards();
 
 		HandsBackend.createPlayers();
