@@ -53,7 +53,7 @@ public class Deck {
 		
 		for(int i = 0; i < 52; i++){
 			Card currentCard = this.cards[i];
-			int random = rand.nextInt(52);
+			int random = rand.nextInt(i+1);
 			this.cards[i] = this.cards[random];
 			this.cards[random] = currentCard;
 		}
